@@ -1,5 +1,6 @@
 import pygame
 import sys
+import random
 from constants import *
 from logger import log_state, log_event
 from player import Player
@@ -46,6 +47,13 @@ def main():
                 log_event("player_hit")
                 print("Game over!")
                 sys.exit()
+        
+        for shot in shots:
+            for asteroid in asteroids:
+                if shot.collides_with(asteroid):
+                    log_event("asteroid_shot")
+                    shot.kill()
+                    asteroid.split()
 
     print(f"Starting Asteroids with pygame version: {pygame.version.ver}")
     print(f"Screen width: {SCREEN_WIDTH}")
