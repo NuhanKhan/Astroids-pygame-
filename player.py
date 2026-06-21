@@ -1,12 +1,14 @@
-from constants import LINE_WIDTH, PLAYER_RADIUS, PLAYER_TURN_SPEED, PLAYER_SPEED, SHOT_RADIUS, PLAYER_SHOT_SPEED
+from constants import LINE_WIDTH, PLAYER_RADIUS, PLAYER_TURN_SPEED, PLAYER_SPEED, SHOT_RADIUS, PLAYER_SHOT_SPEED, PLAYER_SHOOT_COOLDOWN_SECONDS
 import pygame
 from circleshape import CircleShape
 from shot import Shot
 
 class Player(CircleShape):
+    
     def __init__(self, x: float, y: float) -> None:
         super().__init__(x, y, PLAYER_RADIUS)
         self.rotation = 0.0  # in degrees
+        self.shot_cooldown_timer = 0.0  # seconds
 
     def draw(self, screen: pygame.Surface) -> None:
         pygame.draw.polygon(screen, (255, 255, 255), self.triangle(), LINE_WIDTH)
@@ -23,8 +25,13 @@ class Player(CircleShape):
 
     def shoot(self) -> None:
         # create a new shot and shoot it
-        shot = Shot(self.position.x, self.position.y)
-        shot.velocity = pygame.Vector2(0, 1).rotate(self.rotation) * PLAYER_SHOT_SPEED
+        if self.shot_cooldown_timer > 0:
+            return  # still in cooldown, cannot shoot yet
+        else:
+            self.shot_cooldown_timer = PLAYER_SHOOT_COOLDOWN_SECONDS  # reset cooldown timer
+            shot = Shot(self.position.x, self.position.y)
+            shot.velocity = pygame.Vector2(0, 1).rotate(self.rotation) * PLAYER_SHOT_SPEED
+
 
     def triangle(self) -> list[pygame.Vector2]:
         forward = pygame.Vector2(0, 1).rotate(self.rotation)
@@ -48,3 +55,5 @@ class Player(CircleShape):
         if keys[pygame.K_SPACE]:
             # create a new shot and shoot it
             self.shoot()
+
+        self.shot_cooldown_timer -= dt  # decrease cooldown timer by dt
